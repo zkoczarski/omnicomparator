@@ -1,45 +1,44 @@
-#Omnicomparator v1.5
-#Program na licencji CC-BY
-#Autor: Zdzisław Koczarski
+#Omnicomparator v1.6
+#License: CC-BY
+#Author: Zdzisław Koczarski MA
 # ---
-#Niniejszy program służy do porównywania n-gramów dowlnego tekstu z wybranym korpusem źródeł.
-#Obecna wersja programu służy jedynie do wykazania, że dla porównywanych tekstów istnieją wspólne n-gramy, zaprezentowania tej informacji w konsoli oraz zapisania wyników w postaci pliku .csv.
-#Założenie przyświecające temu przedsięwzięciu jest proste - jeżeli autor korzysta ze źródeł bezpośrednio (tj. cytuje je w niezmienionej formie), porównanie n-gramów, zwłaszcza tetragramów i wyżej powinno wykazać przejątki.
-#Analiza bi- i trigramów przyniesie raczej mniejsze efekty (ze względu na wysoką częstotliwość występowania np. wyrażeń przyimkowych), ale może dać nam ogólne pojęcie o podobieństwie porównywanych tekstów.
-#Analiza monogramów ma przedstawić, jak wiele wspólnych słów mają ze sobą porównywane teksty.
-#Program bazuje TYLKO na wyrazach, nie lemmatach.
+#This application is meant to compare n-grams (sequences of n-word) from the any number of texts with the source text.
+#Present version of the app allows only to compare and indicate LITERAL n-grams common for both source and compared text and to save them in form of .csv file.
+#Application is based on comparison of words, not lemmas.
 # ---
-#Program korzysta z pakietów "stylo" oraz "magrittr".
+#Application uses packages "stylo" and "magrittr".
 # ---
 
+#0. Install R-console (if you haven't any) from: https://cran.r-project.org/
+#	Create folders "Source" and "Corpus" in: C:/Users/user/Documents/Omnicomparator/
 
-#1. Zainstaluj pakiet i uruchom biblioteki.
+#1. Install packages and activate the libraries:
 	
-	install.packages("stylo")
-	install.packages("magrittr")
+	requiredPackages = c('stylo','magrittr')
+		for(p in requiredPackages){
+			if(!require(p,character.only = TRUE)) install.packages(p)
+			library(p,character.only = TRUE)
+		}
 	
-	library(stylo)
-	library(magrittr)
-	
-#2. Podaj ścieżkę folderu, w którym rozpakowałeś program. W naszym wypadku jest to:
+#2. Set path for your application folder:
 
 	setwd("C:/Users/user/Documents/Omnicomparator/")
-	BaseFol<-setwd(getwd())
+	BaseFolder<-setwd(getwd())
 	
-#3. Stwórz foldery, w których zostaną zapisane wyniki.
+#3. Create folders for results:
 
-	if(file.exists("N-gram1")) {
-	setwd(BaseFol)
+	if(file.exists("N-gram2")) {
+	setwd(BaseFolder)
 	} 	else 	{
 		for (i in 2:10) {
         NFol <- paste0("N-gram",i)
 		dir.create(NFol)
         setwd(paste0("N-gram", i))
         assign(paste0("N-gram", i), setwd(getwd()))
-        setwd(BaseFol)
+        setwd(BaseFolder)
 	}	}
 
-#4. Przygotuj n-gramy z tekstu źródłowego
+#4. Prepare n-grams from source text:
 
 	setwd("Source")
 	source.text<-tolower(unlist(strsplit(readLines(list.files()), "[^A-Za-z]")))
@@ -53,267 +52,32 @@
 			gsub("ae", "e", .) %>%
 			gsub("oe", "e", .) %>%
 			gsub("y", "i", .) %>%
+			gsub("j", "i", .) %>%
 			gsub("k", "c", .) %>%
-			gsub("v", "u", .) %>%
-			gsub("j", "i", .)
+			gsub("v", "u", .)
 	setwd("..")
 	
 	if(exists("source.ready10")) {
-		setwd(BaseFol)
+		setwd(BaseFolder)
 	} 	else 	{
 		for(i in 2:10) {
 		assign(paste0("Source_Text", i), make.ngrams(source.ready, i))    
 	}	}
 	
 	
-#5. Podaj ścieżkę folderu, w którym znajdują się teksty do porównywania.
+#5. Set path to your corpus:
 
-setwd(BaseFol)
+setwd(BaseFolder)
 setwd("Corpus")
 Corpus<-setwd(getwd())
 
 
-#6. Zaczynamy porównywanie. Możemy wybrać interesujący nas zestaw n-gramów (monogramy, bigramy itp.) lub uruchomić wszystkie po kolei.
-#Program będzie przeprowadzał operacje i zapisywał poszczególne pliki .csv we wcześniej przygotowanych folderach.
-#Żeby uniknąć przeklikiwania wszystkich plików możemy sprawdzać w konsoli, jaki jest procentowy udział wspólnych n-gramów w porównywanych tekstach.
-#(UWAGA: poniższy kod można prawdopodobnie zamknąć w jakiejś pętli 'for', jeszcze nie wymyśliłem, jak to skutecznie zrobić.)
+#6. Start comparison. Application will conduct comparison of n-grams and save the results in .csv files in proper folders:
 
-	for(bi_grams in list.files()) {
-		A<-tolower(unlist(strsplit(readLines(bi_grams), "[^A-Za-z]")))
-		B<-A[nchar(A)>0]
-		B %<>%
-			gsub("tio", "cio", .) %>%
-			gsub("tiu", "ciu", .) %>%
-			gsub("tie", "cie", .) %>%
-			gsub("tia", "cia", .) %>%
-			gsub("tii", "cii", .) %>%
-			gsub("ae", "e", .) %>%
-			gsub("oe", "e", .) %>%
-			gsub("y", "i", .) %>%
-			gsub("k", "c", .) %>%
-			gsub("v", "u", .) %>%
-			gsub("j", "i", .)
-		Bi<-make.ngrams(B, 2)
-		BiList<-intersect(Source_Text2, Bi)
-		BiPerc<-sum(Bi %in% Source_Text2)/sum(Bi %in% Bi)*100
-		setwd(BaseFol)
-		
-		if(length(BiList)>0) {
-			setwd("N-gram2")
-			write.csv(BiList, paste0(bi_grams, ".csv"))
-			setwd(Corpus)
-			message(c(bi_grams, "\t", BiPerc, "%"))
-		} else {
-			setwd(Corpus)
-		} 	}
-		
-	for(tri_grams in list.files()) {
-		A<-tolower(unlist(strsplit(readLines(tri_grams), "[^A-Za-z]")))
-		B<-A[nchar(A)>0]
-		B %<>%
-			gsub("tio", "cio", .) %>%
-			gsub("tiu", "ciu", .) %>%
-			gsub("tie", "cie", .) %>%
-			gsub("tia", "cia", .) %>%
-			gsub("tii", "cii", .) %>%
-			gsub("ae", "e", .) %>%
-			gsub("oe", "e", .) %>%
-			gsub("y", "i", .) %>%
-			gsub("k", "c", .) %>%
-			gsub("v", "u", .) %>%
-			gsub("j", "i", .)
-		Tri<-make.ngrams(B, 3)
-		TriList<-intersect(Source_Text3,Tri)
-		TriPerc<-sum(Tri %in% Source_Text3)/sum(Tri %in% Tri)*100
-		setwd(BaseFol)
-		
-		if(length(TriList)>0) {
-			setwd("N-gram3")
-			write.csv(TriList, paste0(tri_grams, ".csv"))
-			setwd(Corpus)
-			message(c(tri_grams, "\t", TriPerc, "%"))
-		} else {
-			setwd(Corpus)
-		} 	}
-
-	for(tetra_grams in list.files()) {
-		A<-tolower(unlist(strsplit(readLines(tetra_grams), "[^A-Za-z]")))
-		B<-A[nchar(A)>0]
-		B %<>%
-			gsub("tio", "cio", .) %>%
-			gsub("tiu", "ciu", .) %>%
-			gsub("tie", "cie", .) %>%
-			gsub("tia", "cia", .) %>%
-			gsub("tii", "cii", .) %>%
-			gsub("ae", "e", .) %>%
-			gsub("oe", "e", .) %>%
-			gsub("y", "i", .) %>%
-			gsub("k", "c", .) %>%
-			gsub("v", "u", .) %>%
-			gsub("j", "i", .)
-		Tetra<-make.ngrams(B, 4)
-		TetraList<-intersect(Source_Text4, Tetra)
-		TetraPerc<-sum(Tetra %in% Source_Text4)/sum(Tetra %in% Tetra)*100
-		setwd(BaseFol)
-		
-		if(length(TetraList)>0) {
-			setwd("N-gram4")
-			write.csv(TetraList, paste0(tetra_grams, ".csv"))
-			setwd(Corpus)
-			message(c(tetra_grams, "\t", TetraPerc, "%"))
-		} else {
-			setwd(Corpus)
-		} 	}
-		
-	for(penta_grams in list.files()) {
-		A<-tolower(unlist(strsplit(readLines(penta_grams), "[^A-Za-z]")))
-		B<-A[nchar(A)>0]
-		B %<>%
-			gsub("tio", "cio", .) %>%
-			gsub("tiu", "ciu", .) %>%
-			gsub("tie", "cie", .) %>%
-			gsub("tia", "cia", .) %>%
-			gsub("tii", "cii", .) %>%
-			gsub("ae", "e", .) %>%
-			gsub("oe", "e", .) %>%
-			gsub("y", "i", .) %>%
-			gsub("k", "c", .) %>%
-			gsub("v", "u", .) %>%
-			gsub("j", "i", .)
-		Penta<-make.ngrams(B, 5)
-		PentaList<-intersect(Source_Text5, Penta)
-		PentaPerc<-sum(Penta %in% Source_Text5)/sum(Penta %in% Penta)*100
-		setwd(BaseFol)
-		
-		if(length(PentaList)>0) {
-			setwd("N-gram5")
-			write.csv(PentaList, paste0(penta_grams, ".csv"))
-			setwd(Corpus)
-			message(c(penta_grams, "\t", PentaPerc, "%"))
-		} else {
-			setwd(Corpus)
-		} 	}	
-		
-	for(hexa_grams in list.files()) {
-		A<-tolower(unlist(strsplit(readLines(hexa_grams), "[^A-Za-z]")))
-		B<-A[nchar(A)>0]
-		B %<>%
-			gsub("tio", "cio", .) %>%
-			gsub("tiu", "ciu", .) %>%
-			gsub("tie", "cie", .) %>%
-			gsub("tia", "cia", .) %>%
-			gsub("tii", "cii", .) %>%
-			gsub("ae", "e", .) %>%
-			gsub("oe", "e", .) %>%
-			gsub("y", "i", .) %>%
-			gsub("k", "c", .) %>%
-			gsub("v", "u", .) %>%
-			gsub("j", "i", .)
-		Hexa<-make.ngrams(B, 6)
-		HexaList<-intersect(Source_Text6, Hexa)
-		HexaPerc<-sum(Hexa %in% Source_Text6)/sum(Hexa %in% Hexa)*100
-		setwd(BaseFol)
-		
-	if(length(HexaList)>0) {
-			setwd("N-gram6")
-			write.csv(HexaList, paste0(hexa_grams, ".csv"))
-			setwd(Corpus)
-			message(c(hexa_grams, "\t", HexaPerc, "%"))
-		} else {
-			setwd(Corpus)
-		} 	}
-		
-	for(hepta_grams in list.files()) {
-		A<-tolower(unlist(strsplit(readLines(hepta_grams), "[^A-Za-z]")))
-		B<-A[nchar(A)>0]
-		B %<>%
-			gsub("tio", "cio", .) %>%
-			gsub("tiu", "ciu", .) %>%
-			gsub("tie", "cie", .) %>%
-			gsub("tia", "cia", .) %>%
-			gsub("tii", "cii", .) %>%
-			gsub("ae", "e", .) %>%
-			gsub("oe", "e", .) %>%
-			gsub("y", "i", .) %>%
-			gsub("k", "c", .) %>%
-			gsub("v", "u", .) %>%
-			gsub("j", "i", .)
-		Hepta<-make.ngrams(B, 7)
-		HeptaList<-intersect(Source_Text7, Hepta)
-		HeptaPerc<-sum(Hepta %in% Source_Text7)/sum(Hepta %in% Hepta)*100
-		setwd(BaseFol)
-		
-		if(length(HeptaList)>0) {
-			setwd("N-gram7")
-			write.csv(HeptaList, paste0(hepta_grams, ".csv"))
-			setwd(Corpus)
-			message(c(hepta_grams, "\t", HeptaPerc, "%"))
-		} else {
-			setwd(Corpus)
-		} 	}
-		
-	for(okto_grams in list.files()) {
-		A<-tolower(unlist(strsplit(readLines(okto_grams), "[^A-Za-z]")))
-		B<-A[nchar(A)>0]
-		B %<>%
-			gsub("tio", "cio", .) %>%
-			gsub("tiu", "ciu", .) %>%
-			gsub("tie", "cie", .) %>%
-			gsub("tia", "cia", .) %>%
-			gsub("tii", "cii", .) %>%
-			gsub("ae", "e", .) %>%
-			gsub("oe", "e", .) %>%
-			gsub("y", "i", .) %>%
-			gsub("k", "c", .) %>%
-			gsub("v", "u", .) %>%
-			gsub("j", "i", .)
-		Okto<-make.ngrams(B, 8)
-		OktoList<-intersect(Source_Text8, Okto)
-		OktoPerc<-sum(Okto %in% Source_Text8)/sum(Okto %in% Okto)*100
-		setwd(BaseFol)
-		
-		if(length(OktoList)>0) {
-			setwd("N-gram8")
-			write.csv(OktoList, paste0(okto_grams, ".csv"))
-			setwd(Corpus)
-			message(c(okto_grams, "\t", OktoPerc, "%"))
-		} else {
-			setwd(Corpus)
-		} 	}
-		
-	for(ennea_grams in list.files()) {
-		A<-tolower(unlist(strsplit(readLines(ennea_grams), "[^A-Za-z]")))
-		B<-A[nchar(A)>0]
-		B %<>%
-			gsub("tio", "cio", .) %>%
-			gsub("tiu", "ciu", .) %>%
-			gsub("tie", "cie", .) %>%
-			gsub("tia", "cia", .) %>%
-			gsub("tii", "cii", .) %>%
-			gsub("ae", "e", .) %>%
-			gsub("oe", "e", .) %>%
-			gsub("y", "i", .) %>%
-			gsub("k", "c", .) %>%
-			gsub("v", "u", .) %>%
-			gsub("j", "i", .)
-		Ennea<-make.ngrams(B, 9)
-		EnneaList<-intersect(Source_Text9, Ennea)
-		EnneaPerc<-sum(Ennea %in% Source_Text9)/sum(Ennea %in% Ennea)*100
-		setwd(BaseFol)
-		
-		if(length(EnneaList)>0) {
-			setwd("N-gram9")
-			write.csv(EnneaList, paste0(ennea_grams, ".csv"))
-			setwd(Corpus)
-			message(c(ennea_grams, "\t", EnneaPerc, "%"))
-		} else {
-			setwd(Corpus)
-		} 	}
-		
 	for(deka_grams in list.files()) {
-		A<-tolower(unlist(strsplit(readLines(deka_grams), "[^A-Za-z]")))
-		B<-A[nchar(A)>0]
-		B %<>%
+		raw.text<-tolower(unlist(strsplit(readLines(deka_grams), "[^A-Za-z]")))
+		prepared.text<-raw.text[nchar(raw.text)>0]
+		prepared.text %<>%
 			gsub("tio", "cio", .) %>%
 			gsub("tiu", "ciu", .) %>%
 			gsub("tie", "cie", .) %>%
@@ -322,13 +86,13 @@ Corpus<-setwd(getwd())
 			gsub("ae", "e", .) %>%
 			gsub("oe", "e", .) %>%
 			gsub("y", "i", .) %>%
+			gsub("j", "i", .) %>%
 			gsub("k", "c", .) %>%
-			gsub("v", "u", .) %>%
-			gsub("j", "i", .)
-		Deka<-make.ngrams(B, 10)
+			gsub("v", "u", .)
+		Deka<-make.ngrams(prepared.text, 10)
 		DekaList<-intersect(Source_Text10, Deka)
 		DekaPerc<-sum(Deka %in% Source_Text10)/sum(Deka %in% Deka)*100
-		setwd(BaseFol)
+		setwd(BaseFolder)
 		
 		if(length(DekaList)>0) {
 			setwd("N-gram10")
@@ -339,8 +103,240 @@ Corpus<-setwd(getwd())
 			setwd(Corpus)
 		} 	}
 	
-#7. Po skończeniu kompilacji możemy manualnie przeglądać wyniki w celu odnalezienia wspólnych dla porównywanych tekstów n-gramów. Na tej podstawie możemy wnioskować o ewentualnym cytowaniu źródeł przez autora.
-#Program jest niedoskonały z kilku względów. Po pierwsze, w tej postaci potrafi jedynie zaprezentować wyniki w celu dalszej, manualnej ich analizy. Po drugie, wbudowany korpus jest stosunkowo niewielki.
-#Jest jednak dobrą podstawą do prostych badań porównawczych. 
+	for(ennea_grams in list.files()) {
+		raw.text<-tolower(unlist(strsplit(readLines(ennea_grams), "[^A-Za-z]")))
+		prepared.text<-raw.text[nchar(raw.text)>0]
+		prepared.text %<>%
+			gsub("tio", "cio", .) %>%
+			gsub("tiu", "ciu", .) %>%
+			gsub("tie", "cie", .) %>%
+			gsub("tia", "cia", .) %>%
+			gsub("tii", "cii", .) %>%
+			gsub("ae", "e", .) %>%
+			gsub("oe", "e", .) %>%
+			gsub("y", "i", .) %>%
+			gsub("j", "i", .) %>%
+			gsub("k", "c", .) %>%
+			gsub("v", "u", .)
+		Ennea<-make.ngrams(prepared.text, 9)
+		EnneaList<-intersect(Source_Text9, Ennea)
+		EnneaPerc<-sum(Ennea %in% Source_Text9)/sum(Ennea %in% Ennea)*100
+		setwd(BaseFolder)
+		
+		if(length(EnneaList)>0) {
+			setwd("N-gram9")
+			write.csv(EnneaList, paste0(ennea_grams, ".csv"))
+			setwd(Corpus)
+			message(c(ennea_grams, "\t", EnneaPerc, "%"))
+		} else {
+			setwd(Corpus)
+		} 	}
+
+	for(okto_grams in list.files()) {
+		raw.text<-tolower(unlist(strsplit(readLines(okto_grams), "[^A-Za-z]")))
+		prepared.text<-raw.text[nchar(raw.text)>0]
+		prepared.text %<>%
+			gsub("tio", "cio", .) %>%
+			gsub("tiu", "ciu", .) %>%
+			gsub("tie", "cie", .) %>%
+			gsub("tia", "cia", .) %>%
+			gsub("tii", "cii", .) %>%
+			gsub("ae", "e", .) %>%
+			gsub("oe", "e", .) %>%
+			gsub("y", "i", .) %>%
+			gsub("j", "i", .) %>%
+			gsub("k", "c", .) %>%
+			gsub("v", "u", .)
+		Okto<-make.ngrams(prepared.text, 8)
+		OktoList<-intersect(Source_Text8, Okto)
+		OktoPerc<-sum(Okto %in% Source_Text8)/sum(Okto %in% Okto)*100
+		setwd(BaseFolder)
+		
+		if(length(OktoList)>0) {
+			setwd("N-gram8")
+			write.csv(OktoList, paste0(okto_grams, ".csv"))
+			setwd(Corpus)
+			message(c(okto_grams, "\t", OktoPerc, "%"))
+		} else {
+			setwd(Corpus)
+		} 	}
+		
+	for(hepta_grams in list.files()) {
+		raw.text<-tolower(unlist(strsplit(readLines(hepta_grams), "[^A-Za-z]")))
+		prepared.text<-raw.text[nchar(raw.text)>0]
+		prepared.text %<>%
+			gsub("tio", "cio", .) %>%
+			gsub("tio", "cio", .) %>%
+			gsub("tiu", "ciu", .) %>%
+			gsub("tie", "cie", .) %>%
+			gsub("tia", "cia", .) %>%
+			gsub("tii", "cii", .) %>%
+			gsub("ae", "e", .) %>%
+			gsub("oe", "e", .) %>%
+			gsub("y", "i", .) %>%
+			gsub("j", "i", .) %>%
+			gsub("k", "c", .) %>%
+			gsub("v", "u", .)
+		Hepta<-make.ngrams(prepared.text, 7)
+		HeptaList<-intersect(Source_Text7, Hepta)
+		HeptaPerc<-sum(Hepta %in% Source_Text7)/sum(Hepta %in% Hepta)*100
+		setwd(BaseFolder)
+		
+		if(length(HeptaList)>0) {
+			setwd("N-gram7")
+			write.csv(HeptaList, paste0(hepta_grams, ".csv"))
+			setwd(Corpus)
+			message(c(hepta_grams, "\t", HeptaPerc, "%"))
+		} else {
+			setwd(Corpus)
+		} 	}
+		
+	for(hexa_grams in list.files()) {
+		raw.text<-tolower(unlist(strsplit(readLines(hexa_grams), "[^A-Za-z]")))
+		B<-raw.text[nchar(raw.text)>0]
+		B %<>%
+			gsub("tio", "cio", .) %>%
+			gsub("tiu", "ciu", .) %>%
+			gsub("tie", "cie", .) %>%
+			gsub("tia", "cia", .) %>%
+			gsub("tii", "cii", .) %>%
+			gsub("ae", "e", .) %>%
+			gsub("oe", "e", .) %>%
+			gsub("y", "i", .) %>%
+			gsub("j", "i", .) %>%
+			gsub("k", "c", .) %>%
+			gsub("v", "u", .)
+		Hexa<-make.ngrams(B, 6)
+		HexaList<-intersect(Source_Text6, Hexa)
+		HexaPerc<-sum(Hexa %in% Source_Text6)/sum(Hexa %in% Hexa)*100
+		setwd(BaseFolder)
+		
+	if(length(HexaList)>0) {
+			setwd("N-gram6")
+			write.csv(HexaList, paste0(hexa_grams, ".csv"))
+			setwd(Corpus)
+			message(c(hexa_grams, "\t", HexaPerc, "%"))
+		} else {
+			setwd(Corpus)
+		} 	}
+		
+	for(penta_grams in list.files()) {
+		raw.text<-tolower(unlist(strsplit(readLines(penta_grams), "[^A-Za-z]")))
+		prepared.text<-raw.text[nchar(raw.text)>0]
+		prepared.text %<>%
+			gsub("tio", "cio", .) %>%
+			gsub("tiu", "ciu", .) %>%
+			gsub("tie", "cie", .) %>%
+			gsub("tia", "cia", .) %>%
+			gsub("tii", "cii", .) %>%
+			gsub("ae", "e", .) %>%
+			gsub("oe", "e", .) %>%
+			gsub("y", "i", .) %>%
+			gsub("j", "i", .) %>%
+			gsub("k", "c", .) %>%
+			gsub("v", "u", .)
+		Penta<-make.ngrams(prepared.text, 5)
+		PentaList<-intersect(Source_Text5, Penta)
+		PentaPerc<-sum(Penta %in% Source_Text5)/sum(Penta %in% Penta)*100
+		setwd(BaseFolder)
+		
+		if(length(PentaList)>0) {
+			setwd("N-gram5")
+			write.csv(PentaList, paste0(penta_grams, ".csv"))
+			setwd(Corpus)
+			message(c(penta_grams, "\t", PentaPerc, "%"))
+		} else {
+			setwd(Corpus)
+		} 	}	
+			
+	for(tetra_grams in list.files()) {
+		raw.text<-tolower(unlist(strsplit(readLines(tetra_grams), "[^A-Za-z]")))
+		prepared.text<-raw.text[nchar(raw.text)>0]
+		prepared.text %<>%
+			gsub("tio", "cio", .) %>%
+			gsub("tiu", "ciu", .) %>%
+			gsub("tie", "cie", .) %>%
+			gsub("tia", "cia", .) %>%
+			gsub("tii", "cii", .) %>%
+			gsub("ae", "e", .) %>%
+			gsub("oe", "e", .) %>%
+			gsub("y", "i", .) %>%
+			gsub("j", "i", .) %>%
+			gsub("k", "c", .) %>%
+			gsub("v", "u", .)
+		Tetra<-make.ngrams(prepared.text, 4)
+		TetraList<-intersect(Source_Text4, Tetra)
+		TetraPerc<-sum(Tetra %in% Source_Text4)/sum(Tetra %in% Tetra)*100
+		setwd(BaseFolder)
+		
+		if(length(TetraList)>0) {
+			setwd("N-gram4")
+			write.csv(TetraList, paste0(tetra_grams, ".csv"))
+			setwd(Corpus)
+			message(c(tetra_grams, "\t", TetraPerc, "%"))
+		} else {
+			setwd(Corpus)
+		} 	}
+		
+	for(tri_grams in list.files()) {
+		raw.text<-tolower(unlist(strsplit(readLines(tri_grams), "[^A-Za-z]")))
+		prepared.text<-raw.text[nchar(raw.text)>0]
+		prepared.text %<>%
+			gsub("tio", "cio", .) %>%
+			gsub("tiu", "ciu", .) %>%
+			gsub("tie", "cie", .) %>%
+			gsub("tia", "cia", .) %>%
+			gsub("tii", "cii", .) %>%
+			gsub("ae", "e", .) %>%
+			gsub("oe", "e", .) %>%
+			gsub("y", "i", .) %>%
+			gsub("j", "i", .) %>%
+			gsub("k", "c", .) %>%
+			gsub("v", "u", .)
+		Tri<-make.ngrams(prepared.text, 3)
+		TriList<-intersect(Source_Text3,Tri)
+		TriPerc<-sum(Tri %in% Source_Text3)/sum(Tri %in% Tri)*100
+		setwd(BaseFolder)
+		
+		if(length(TriList)>0) {
+			setwd("N-gram3")
+			write.csv(TriList, paste0(tri_grams, ".csv"))
+			setwd(Corpus)
+			message(c(tri_grams, "\t", TriPerc, "%"))
+		} else {
+			setwd(Corpus)
+		} 	}
+
+	for(bi_grams in list.files()) {
+		raw.text<-tolower(unlist(strsplit(readLines(bi_grams), "[^A-Za-z]")))
+		prepared.text<-raw.text[nchar(raw.text)>0]
+		prepared.text %<>%
+			gsub("tio", "cio", .) %>%
+			gsub("tiu", "ciu", .) %>%
+			gsub("tie", "cie", .) %>%
+			gsub("tia", "cia", .) %>%
+			gsub("tii", "cii", .) %>%
+			gsub("ae", "e", .) %>%
+			gsub("oe", "e", .) %>%
+			gsub("y", "i", .) %>%
+			gsub("j", "i", .) %>%
+			gsub("k", "c", .) %>%
+			gsub("v", "u", .)
+		Bi<-make.ngrams(prepared.text, 2)
+		BiList<-intersect(Source_Text2, Bi)
+		BiPerc<-sum(Bi %in% Source_Text2)/sum(Bi %in% Bi)*100
+		setwd(BaseFolder)
+		
+		if(length(BiList)>0) {
+			setwd("N-gram2")
+			write.csv(BiList, paste0(bi_grams, ".csv"))
+			setwd(Corpus)
+			message(c(bi_grams, "\t", BiPerc, "%"))
+		} else {
+			setwd(Corpus)
+		} 	}
+		
+#7. After finished comparison you have to check manually single files for results. The longer common n-gram the more possible is the quotation.
+# Application will be improved in future :)
 ### END OF CODE ###
 	
