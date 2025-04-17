@@ -1,4 +1,4 @@
-#Omnicomparator v1.6
+#Omnicomparator v1.7
 #License: CC-BY
 #Author: Zdzisław Koczarski MA
 # ---
@@ -54,7 +54,9 @@
 			gsub("y", "i", .) %>%
 			gsub("j", "i", .) %>%
 			gsub("k", "c", .) %>%
-			gsub("v", "u", .)
+			gsub("v", "u", .) %>%
+			gsub("ichi", "ihi", .) %>%
+			gsub("nq", "mq", .)
 	setwd("..")
 	
 	if(exists("source.ready10")) {
@@ -88,7 +90,9 @@ Corpus<-setwd(getwd())
 			gsub("y", "i", .) %>%
 			gsub("j", "i", .) %>%
 			gsub("k", "c", .) %>%
-			gsub("v", "u", .)
+			gsub("v", "u", .) %>%
+			gsub("ichi", "ihi", .) %>%
+			gsub("nq", "mq", .)
 		Deka<-make.ngrams(prepared.text, 10)
 		DekaList<-intersect(Source_Text10, Deka)
 		DekaPerc<-sum(Deka %in% Source_Text10)/sum(Deka %in% Deka)*100
@@ -117,7 +121,9 @@ Corpus<-setwd(getwd())
 			gsub("y", "i", .) %>%
 			gsub("j", "i", .) %>%
 			gsub("k", "c", .) %>%
-			gsub("v", "u", .)
+			gsub("v", "u", .) %>%
+			gsub("ichi", "ihi", .) %>%
+			gsub("nq", "mq", .)
 		Ennea<-make.ngrams(prepared.text, 9)
 		EnneaList<-intersect(Source_Text9, Ennea)
 		EnneaPerc<-sum(Ennea %in% Source_Text9)/sum(Ennea %in% Ennea)*100
@@ -146,7 +152,9 @@ Corpus<-setwd(getwd())
 			gsub("y", "i", .) %>%
 			gsub("j", "i", .) %>%
 			gsub("k", "c", .) %>%
-			gsub("v", "u", .)
+			gsub("v", "u", .) %>%
+			gsub("ichi", "ihi", .) %>%
+			gsub("nq", "mq", .)
 		Okto<-make.ngrams(prepared.text, 8)
 		OktoList<-intersect(Source_Text8, Okto)
 		OktoPerc<-sum(Okto %in% Source_Text8)/sum(Okto %in% Okto)*100
@@ -176,7 +184,9 @@ Corpus<-setwd(getwd())
 			gsub("y", "i", .) %>%
 			gsub("j", "i", .) %>%
 			gsub("k", "c", .) %>%
-			gsub("v", "u", .)
+			gsub("v", "u", .) %>%
+			gsub("ichi", "ihi", .) %>%
+			gsub("nq", "mq", .)
 		Hepta<-make.ngrams(prepared.text, 7)
 		HeptaList<-intersect(Source_Text7, Hepta)
 		HeptaPerc<-sum(Hepta %in% Source_Text7)/sum(Hepta %in% Hepta)*100
@@ -205,7 +215,9 @@ Corpus<-setwd(getwd())
 			gsub("y", "i", .) %>%
 			gsub("j", "i", .) %>%
 			gsub("k", "c", .) %>%
-			gsub("v", "u", .)
+			gsub("v", "u", .) %>%
+			gsub("ichi", "ihi", .) %>%
+			gsub("nq", "mq", .)
 		Hexa<-make.ngrams(B, 6)
 		HexaList<-intersect(Source_Text6, Hexa)
 		HexaPerc<-sum(Hexa %in% Source_Text6)/sum(Hexa %in% Hexa)*100
@@ -234,7 +246,9 @@ Corpus<-setwd(getwd())
 			gsub("y", "i", .) %>%
 			gsub("j", "i", .) %>%
 			gsub("k", "c", .) %>%
-			gsub("v", "u", .)
+			gsub("v", "u", .) %>%
+			gsub("ichi", "ihi", .) %>%
+			gsub("nq", "mq", .)
 		Penta<-make.ngrams(prepared.text, 5)
 		PentaList<-intersect(Source_Text5, Penta)
 		PentaPerc<-sum(Penta %in% Source_Text5)/sum(Penta %in% Penta)*100
@@ -263,7 +277,9 @@ Corpus<-setwd(getwd())
 			gsub("y", "i", .) %>%
 			gsub("j", "i", .) %>%
 			gsub("k", "c", .) %>%
-			gsub("v", "u", .)
+			gsub("v", "u", .) %>%
+			gsub("ichi", "ihi", .) %>%
+			gsub("nq", "mq", .)
 		Tetra<-make.ngrams(prepared.text, 4)
 		TetraList<-intersect(Source_Text4, Tetra)
 		TetraPerc<-sum(Tetra %in% Source_Text4)/sum(Tetra %in% Tetra)*100
@@ -292,7 +308,9 @@ Corpus<-setwd(getwd())
 			gsub("y", "i", .) %>%
 			gsub("j", "i", .) %>%
 			gsub("k", "c", .) %>%
-			gsub("v", "u", .)
+			gsub("v", "u", .) %>%
+			gsub("ichi", "ihi", .) %>%
+			gsub("nq", "mq", .)
 		Tri<-make.ngrams(prepared.text, 3)
 		TriList<-intersect(Source_Text3,Tri)
 		TriPerc<-sum(Tri %in% Source_Text3)/sum(Tri %in% Tri)*100
@@ -321,7 +339,9 @@ Corpus<-setwd(getwd())
 			gsub("y", "i", .) %>%
 			gsub("j", "i", .) %>%
 			gsub("k", "c", .) %>%
-			gsub("v", "u", .)
+			gsub("v", "u", .) %>%
+			gsub("ichi", "ihi", .) %>%
+			gsub("nq", "mq", .)
 		Bi<-make.ngrams(prepared.text, 2)
 		BiList<-intersect(Source_Text2, Bi)
 		BiPerc<-sum(Bi %in% Source_Text2)/sum(Bi %in% Bi)*100
